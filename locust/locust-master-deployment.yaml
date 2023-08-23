@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: locust-master
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: locust-master
+  template:
+    metadata:
+      labels:
+        app: locust-master
+    spec:
+      containers:
+        - name: locust-master
+          image: locustio/locust
+          resources:
+            requests:
+              cpu: 200m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+          ports:
+            - containerPort: 8089
+          args:
+            - "-f"
+            - "/mnt/locust-tasks/locustfile.py"  # Caminho para o arquivo de tasks do Locust
+            - "--master"
+          volumeMounts:
+            - name: locust-tasks-volume
+              mountPath: /mnt/locust-tasks
+      volumes:
+        - name: locust-tasks-volume
+          emptyDir: {}

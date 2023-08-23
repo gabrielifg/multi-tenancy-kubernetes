@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: locust-slave
+spec:
+  replicas: 2  # Defina o número de slaves desejados
+  selector:
+    matchLabels:
+      app: locust-slave
+  template:
+    metadata:
+      labels:
+        app: locust-slave
+    spec:
+      containers:
+        - name: locust-slave
+          image: locustio/locust
+          resources:
+            requests:
+              cpu: 500m
+              memory: 512Mi
+            limits:
+              cpu: 1000m
+              memory: 1024Mi
+          env:
+            - name: LOCUST_MASTER_HOST
+              value: locust-master-service  # Nome do serviço do Master criado anteriormente
+            - name: LOCUST_LOCUSTFILE_PATH
+              value: "/mnt/locust-tasks/locustfile.py"  # Caminho para o arquivo de tasks do Locust
+          command: ["locust"]
+          args:
+            - "--slave"
+          volumeMounts:
+            - name: locust-tasks-volume
+              mountPath: /mnt/locust-tasks
+      volumes:
+        - name: locust-tasks-volume
+          emptyDir: {}
